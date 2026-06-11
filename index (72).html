@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#111111"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="ICM"/>
+  <title>Instituto Cultural das Montanhas</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --c0:#111111; --c1:#444444; --c2:#888888; --c3:#AAAAAA; --c4:#E8E8E8;
+  --bg:#FFFFFF; --bg2:#F5F5F5;
+  --r12:12px;--r16:16px;--r20:20px;--r99:99px;
+  --font:'Inter',system-ui,sans-serif;
+}
+html,body{height:100%;width:100%;font-family:var(--font);background:#c8c8c8;overflow:hidden;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--c0);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .55s ease,visibility .55s ease;}
+#splash.out{opacity:0;visibility:hidden;pointer-events:none;}
+.spl-logo{animation:spl-drop .8s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes spl-drop{from{opacity:0;transform:translateY(-16px) scale(.9)}to{opacity:1;transform:none}}
+.spl-sub{color:var(--c3);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;margin-top:16px;}
+
+/* APP */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);max-width:430px;margin:0 auto;opacity:0;transition:opacity .4s ease;overflow:hidden;}
+#app.ready{opacity:1;}
+.safe-t{height:env(safe-area-inset-top,0px);background:var(--bg);flex-shrink:0;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;background:var(--bg);flex-shrink:0;min-height:54px;border-bottom:1.5px solid var(--c4);}
+.hdr-l{display:flex;align-items:center;gap:10px;}
+.burger{width:32px;height:32px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4.5px;padding:2px;}
+.burger span{display:block;height:2px;background:var(--c0);border-radius:2px;}
+.burger span:nth-child(1){width:20px;}
+.burger span:nth-child(2){width:13px;}
+.burger span:nth-child(3){width:17px;}
+.avt{width:34px;height:34px;border-radius:50%;background:var(--c4);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--c1);}
+
+/* DRAWER */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:49;opacity:0;pointer-events:none;transition:opacity .3s;}
+.ovl.open{opacity:1;pointer-events:all;}
+.drw{position:fixed;top:0;left:0;bottom:0;width:80%;max-width:290px;background:var(--c0);z-index:50;transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto;}
+.drw.open{transform:translateX(0);}
+.drw-hd{padding:calc(env(safe-area-inset-top,0px)+28px) 22px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+.drw-sub-label{color:var(--c3);font-size:.65rem;margin-top:10px;letter-spacing:.05em;}
+.drw-nav{list-style:none;padding:8px 0;flex:1;}
+.drw-nav a{display:flex;align-items:center;gap:12px;padding:13px 22px;color:rgba(255,255,255,.6);text-decoration:none;font-size:.86rem;font-weight:500;cursor:pointer;transition:color .15s,background .15s;}
+.drw-nav a.on,.drw-nav a:active{color:#fff;background:rgba(255,255,255,.07);}
+.ni{font-size:.9rem;width:18px;text-align:center;}
+.drw-ft{padding:14px 22px calc(env(safe-area-inset-bottom,0px)+16px);border-top:1px solid rgba(255,255,255,.1);}
+.drw-btn{display:block;text-align:center;background:var(--c4);color:var(--c0);padding:12px;border-radius:var(--r99);text-decoration:none;font-weight:800;font-size:.83rem;cursor:pointer;border:none;font-family:var(--font);}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(env(safe-area-inset-bottom,0px)+68px);}
+.page{display:none;animation:pIn .22s ease;}
+.page.active{display:block;}
+@keyframes pIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* BOTTOM NAV */
+.bnv{display:flex;background:var(--bg);border-top:1.5px solid var(--c4);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -3px 14px rgba(0,0,0,.06);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:none;border:none;cursor:pointer;color:var(--c3);font-family:var(--font);font-size:.58rem;font-weight:600;}
+.bn.on{color:var(--c0);}
+
+/* HOME HERO */
+.hero{background:var(--c0);padding:24px 22px 0;position:relative;}
+.hero-ey{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);color:var(--c3);font-size:.61rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:var(--r99);margin-bottom:18px;}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:var(--c3);flex-shrink:0;}
+.hero-h{font-size:2.5rem;font-weight:900;color:#fff;letter-spacing:-.045em;line-height:.97;margin-bottom:12px;}
+.hero-p{color:var(--c3);font-size:.8rem;line-height:1.65;margin-bottom:22px;}
+.hero-acts{display:flex;gap:10px;padding-bottom:32px;}
+.bh{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:var(--r99);font-size:.8rem;font-weight:700;text-decoration:none;cursor:pointer;border:none;font-family:var(--font);}
+.bh.f{background:var(--c4);color:var(--c0);}
+.bh.g{background:rgba(255,255,255,.11);color:#fff;border:1.5px solid rgba(255,255,255,.22);}
+.hero-sep{display:block;width:100%;height:28px;background:var(--bg);clip-path:ellipse(54% 100% at 50% 100%);}
+
+/* SECTIONS */
+.sec{padding:18px 20px 4px;}
+.sec-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+.sec-t{font-size:.95rem;font-weight:800;color:var(--c0);letter-spacing:-.02em;}
+.sec-more{font-size:.7rem;font-weight:600;color:var(--c2);cursor:pointer;background:none;border:none;font-family:var(--font);}
+
+/* project cards */
+.pscroll{display:flex;gap:11px;overflow-x:auto;padding:2px 20px 14px;margin:0 -20px;scrollbar-width:none;}
+.pscroll::-webkit-scrollbar{display:none;}
+.pc{flex:0 0 130px;background:var(--bg2);border-radius:var(--r20);padding:15px 13px;cursor:pointer;border:1.5px solid var(--c4);}
+.pc:active{transform:scale(.97);}
+.pc-ic{width:36px;height:36px;border-radius:12px;background:var(--c0);display:flex;align-items:center;justify-content:center;font-size:1.05rem;margin-bottom:9px;}
+.pc h4{font-size:.74rem;font-weight:700;color:var(--c0);line-height:1.3;margin-bottom:3px;}
+.pc p{font-size:.63rem;color:var(--c2);}
+
+/* event rows */
+.evl{display:flex;flex-direction:column;gap:9px;}
+.evr{display:flex;align-items:center;gap:12px;background:var(--bg);border:1.5px solid var(--c4);border-radius:var(--r16);padding:12px 14px;cursor:pointer;}
+.evb{min-width:42px;height:42px;border-radius:12px;background:var(--c0);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.evb .ei{font-size:1.1rem;line-height:1;}
+.evb .el{font-size:.48rem;color:var(--c3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.evinfo{flex:1;}
+.evinfo h4{font-size:.84rem;font-weight:700;color:var(--c0);margin-bottom:2px;}
+.evinfo p{font-size:.68rem;color:var(--c2);}
+.evarr{color:var(--c3);font-size:1rem;}
+
+/* stats */
+.stats{display:flex;background:var(--c0);border-radius:var(--r20);margin:16px 20px;padding:18px 0;}
+.st{flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.1);}
+.st:last-child{border-right:none;}
+.stn{font-size:1.55rem;font-weight:900;color:var(--c4);letter-spacing:-.04em;display:block;}
+.stl{font-size:.58rem;color:var(--c3);text-transform:uppercase;letter-spacing:.08em;}
+
+/* PAGE HEADER */
+.pgh{padding:20px 20px 14px;border-bottom:1px solid var(--c4);}
+.pg-ey{font-size:.6rem;font-weight:700;color:var(--c2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.pg-t{font-size:1.6rem;font-weight:900;color:var(--c0);letter-spacing:-.03em;line-height:1.1;margin-bottom:4px;}
+.pg-d{font-size:.79rem;color:var(--c2);line-height:1.5;}
+
+/* ITEM ROW */
+.ilist{padding:10px 20px 18px;display:flex;flex-direction:column;gap:8px;}
+.irow{display:flex;align-items:center;gap:12px;background:var(--bg);border:1.5px solid var(--c4);border-radius:var(--r16);padding:12px 14px;cursor:pointer;}
+.irow:active{background:var(--bg2);}
+.iic{width:40px;height:40px;border-radius:12px;background:var(--c4);display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+.iic.dk{background:var(--c0);}
+.ibody{flex:1;}
+.ibody h4{font-size:.85rem;font-weight:700;color:var(--c0);margin-bottom:2px;}
+.ibody p{font-size:.7rem;color:var(--c2);line-height:1.4;}
+.iarr{color:var(--c3);font-size:1rem;flex-shrink:0;}
+
+/* DETAIL VIEW (sub-página interna) */
+.detail{display:none;position:absolute;inset:0;background:var(--bg);z-index:20;overflow-y:auto;animation:pIn .22s ease;}
+.detail.open{display:block;}
+.detail-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--c4);background:var(--bg);position:sticky;top:0;z-index:5;}
+.back-btn{background:none;border:none;cursor:pointer;color:var(--c0);font-size:1.4rem;line-height:1;padding:2px 6px 2px 0;}
+.detail-hdr-title{font-size:.9rem;font-weight:700;color:var(--c0);}
+.detail-hero{background:var(--c0);padding:28px 22px;}
+.detail-hero .di{font-size:2.5rem;margin-bottom:14px;}
+.detail-hero h2{font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.1;margin-bottom:10px;}
+.detail-hero p{color:var(--c3);font-size:.82rem;line-height:1.6;}
+.detail-sep{display:block;width:100%;height:24px;background:var(--bg);clip-path:ellipse(54% 100% at 50% 100%);}
+.detail-body{padding:10px 20px 32px;}
+.detail-section{margin-bottom:20px;}
+.detail-section h3{font-size:.75rem;font-weight:700;color:var(--c2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.detail-section p{font-size:.85rem;color:var(--c1);line-height:1.7;}
+.detail-section ul{padding-left:18px;}
+.detail-section ul li{font-size:.84rem;color:var(--c1);line-height:1.8;}
+.tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
+.tag{background:var(--bg2);border:1px solid var(--c4);border-radius:var(--r99);padding:5px 12px;font-size:.72rem;color:var(--c1);font-weight:500;}
+.tag.dark{background:var(--c0);color:var(--c4);}
+
+/* EVENTO CARDS */
+.evcards{padding:10px 20px 18px;display:flex;flex-direction:column;gap:10px;}
+.evc{border-radius:var(--r20);padding:20px;cursor:pointer;display:block;}
+.evc:active{opacity:.92;}
+.evc.lt{background:var(--bg2);border:1.5px solid var(--c4);}
+.evc.dk{background:var(--c0);}
+.evc-tag{font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;}
+.evc.lt .evc-tag{color:var(--c2);}
+.evc.dk .evc-tag{color:var(--c3);}
+.evc h3{font-size:1.12rem;font-weight:900;letter-spacing:-.02em;line-height:1.15;margin-bottom:6px;}
+.evc.lt h3{color:var(--c0);}
+.evc.dk h3{color:#fff;}
+.evc p{font-size:.75rem;line-height:1.5;margin-bottom:11px;}
+.evc.lt p{color:var(--c1);}
+.evc.dk p{color:var(--c3);}
+.evc-cta{font-size:.73rem;font-weight:700;}
+.evc.lt .evc-cta{color:var(--c0);}
+.evc.dk .evc-cta{color:var(--c4);}
+
+/* SOBRE */
+.swrap{padding:10px 20px 26px;}
+.sq{background:var(--c0);border-radius:var(--r20);padding:22px;margin-bottom:12px;position:relative;overflow:hidden;}
+.sq-logo-bg{position:absolute;right:-10px;bottom:-10px;opacity:.07;}
+.sq-mk{font-size:2rem;color:var(--c3);line-height:.8;margin-bottom:8px;}
+.sq-tx{font-size:.93rem;font-weight:700;color:#fff;line-height:1.5;}
+.infc{background:var(--bg2);border-radius:var(--r16);padding:15px 17px;margin-bottom:8px;border:1px solid var(--c4);}
+.infl{font-size:.59rem;font-weight:700;color:var(--c2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.infv{font-size:.82rem;color:var(--c0);line-height:1.6;font-weight:500;}
+.slinks{display:flex;flex-direction:column;margin-bottom:12px;}
+.slink{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--c4);cursor:pointer;color:var(--c0);font-size:.85rem;font-weight:600;}
+.slink:last-child{border-bottom:none;}
+.cnpj-tag{text-align:center;font-size:.67rem;color:var(--c3);padding:9px;background:var(--bg2);border-radius:12px;border:1px solid var(--c4);}
+
+/* CONTATO */
+.ctwrap{padding:10px 20px 26px;}
+.socgrid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.socc{display:flex;align-items:center;gap:12px;background:var(--bg);border:1.5px solid var(--c4);border-radius:var(--r16);padding:12px 14px;text-decoration:none;color:var(--c0);}
+.socc:active{background:var(--bg2);}
+.socic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;}
+.socbody{flex:1;}
+.socbody h4{font-size:.85rem;font-weight:700;margin-bottom:2px;}
+.socbody p{font-size:.69rem;color:var(--c2);}
+.donatecta{background:var(--c0);border-radius:var(--r20);padding:22px 20px;text-align:center;}
+.donatecta p{color:var(--c3);font-size:.79rem;margin-bottom:14px;line-height:1.5;}
+.btn-donate{display:block;background:var(--c4);color:var(--c0);font-weight:800;font-size:.88rem;padding:14px;border-radius:var(--r99);text-decoration:none;}
+
+/* NOTICIAS */
+.nwrap{padding:10px 20px 26px;}
+.news-card{background:var(--bg2);border:1.5px solid var(--c4);border-radius:var(--r20);padding:18px;margin-bottom:10px;cursor:pointer;}
+.news-card:active{background:var(--c4);}
+.news-tag{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c2);margin-bottom:7px;}
+.news-card h4{font-size:.9rem;font-weight:800;color:var(--c0);margin-bottom:6px;line-height:1.3;}
+.news-card p{font-size:.76rem;color:var(--c1);line-height:1.5;}
+.news-card .news-more{font-size:.72rem;font-weight:700;color:var(--c0);margin-top:10px;display:block;}
+
+/* TRANSPARÊNCIA */
+.twrap{padding:10px 20px 26px;display:flex;flex-direction:column;gap:10px;}
+.tcard{background:var(--bg2);border-radius:var(--r20);padding:20px;border:1px solid var(--c4);cursor:pointer;}
+.tcard:active{background:var(--c4);}
+.tc-ic{font-size:1.6rem;margin-bottom:9px;}
+.tcard h4{font-size:.9rem;font-weight:800;color:var(--c0);margin-bottom:4px;}
+.tcard p{font-size:.77rem;color:var(--c1);line-height:1.5;margin-bottom:10px;}
+.tcard-arr{font-size:.8rem;font-weight:700;color:var(--c0);}
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="spl-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" width="220" height="110">
+      <g transform="translate(148,2)">
+        <polygon points="38,0 46,14 54,8 60,22 56,36 64,30 68,46 62,60 70,54 72,72 66,86 74,96 68,108 30,108" fill="#555555"/>
+        <polygon points="38,0 30,14 22,10 18,26 24,40 16,48 20,62 14,76 18,90 22,108 68,108 66,86 60,70 62,60 56,46 60,30 54,18 46,14" fill="#999999"/>
+        <polygon points="38,0 30,14 46,14" fill="#dddddd"/>
+        <polygon points="22,40 16,48 30,44" fill="#bbbbbb" opacity=".7"/>
+        <polygon points="60,30 68,26 64,42" fill="#bbbbbb" opacity=".5"/>
+        <polygon points="14,76 20,68 18,90" fill="#bbbbbb" opacity=".5"/>
+        <rect x="0" y="106" width="90" height="4" rx="2" fill="#555555" opacity=".5"/>
+      </g>
+      <text x="10" y="42" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="white" letter-spacing="2">INSTITUTO</text>
+      <text x="10" y="57" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="white" letter-spacing="2">CULTURAL DAS</text>
+      <text x="4" y="100" font-family="'Dancing Script','Brush Script MT',cursive" font-size="40" font-weight="700" fill="white" letter-spacing="-0.5">montanhas</text>
+    </svg>
+  </div>
+  <p class="spl-sub">Afonso Cláudio · ES</p>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="safe-t"></div>
+
+  <header class="hdr">
+    <div class="hdr-l">
+      <button class="burger" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" width="110" height="55">
+        <g transform="translate(148,2)">
+          <polygon points="38,0 46,14 54,8 60,22 56,36 64,30 68,46 62,60 70,54 72,72 66,86 74,96 68,108 30,108" fill="#555555"/>
+          <polygon points="38,0 30,14 22,10 18,26 24,40 16,48 20,62 14,76 18,90 22,108 68,108 66,86 60,70 62,60 56,46 60,30 54,18 46,14" fill="#999999"/>
+          <polygon points="38,0 30,14 46,14" fill="#dddddd"/>
+          <polygon points="22,40 16,48 30,44" fill="#bbbbbb" opacity=".6"/>
+          <polygon points="60,30 68,26 64,42" fill="#bbbbbb" opacity=".4"/>
+          <rect x="0" y="106" width="90" height="4" rx="2" fill="#555555" opacity=".4"/>
+        </g>
+        <text x="10" y="42" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="#111111" letter-spacing="2">INSTITUTO</text>
+        <text x="10" y="57" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="#111111" letter-spacing="2">CULTURAL DAS</text>
+        <text x="4" y="100" font-family="'Dancing Script','Brush Script MT',cursive" font-size="40" font-weight="700" fill="#111111" letter-spacing="-0.5">montanhas</text>
+      </svg>
+    </div>
+    <button class="avt" onclick="go('contato')" aria-label="Contato">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </header>
+
+  <div id="ovl" class="ovl" onclick="toggleDrawer()"></div>
+  <nav id="drw" class="drw">
+    <div class="drw-hd">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" width="150" height="75">
+        <g transform="translate(148,2)">
+          <polygon points="38,0 46,14 54,8 60,22 56,36 64,30 68,46 62,60 70,54 72,72 66,86 74,96 68,108 30,108" fill="#555555"/>
+          <polygon points="38,0 30,14 22,10 18,26 24,40 16,48 20,62 14,76 18,90 22,108 68,108 66,86 60,70 62,60 56,46 60,30 54,18 46,14" fill="#999999"/>
+          <polygon points="38,0 30,14 46,14" fill="#dddddd"/>
+          <polygon points="22,40 16,48 30,44" fill="#bbbbbb" opacity=".7"/>
+          <polygon points="60,30 68,26 64,42" fill="#bbbbbb" opacity=".5"/>
+          <rect x="0" y="106" width="90" height="4" rx="2" fill="#555555" opacity=".4"/>
+        </g>
+        <text x="10" y="42" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="white" letter-spacing="2">INSTITUTO</text>
+        <text x="10" y="57" font-family="Arial,Helvetica,sans-serif" font-size="10.5" font-weight="700" fill="white" letter-spacing="2">CULTURAL DAS</text>
+        <text x="4" y="100" font-family="'Dancing Script','Brush Script MT',cursive" font-size="40" font-weight="700" fill="white" letter-spacing="-0.5">montanhas</text>
+      </svg>
+      <p class="drw-sub-label">Afonso Cláudio · ES</p>
+    </div>
+    <ul class="drw-nav">
+      <li><a onclick="go('home');toggleDrawer()" id="dl-home" class="on"><span class="ni">🏠</span> Início</a></li>
+      <li><a onclick="go('projetos');toggleDrawer()" id="dl-projetos"><span class="ni">🎵</span> Projetos</a></li>
+      <li><a onclick="go('eventos');toggleDrawer()" id="dl-eventos"><span class="ni">📅</span> Eventos</a></li>
+      <li><a onclick="go('noticias');toggleDrawer()" id="dl-noticias"><span class="ni">📰</span> Notícias</a></li>
+      <li><a onclick="go('sobre');toggleDrawer()" id="dl-sobre"><span class="ni">ℹ️</span> Sobre</a></li>
+      <li><a onclick="go('transparencia');toggleDrawer()" id="dl-transparencia"><span class="ni">📊</span> Transparência</a></li>
+      <li><a onclick="go('contato');toggleDrawer()" id="dl-contato"><span class="ni">📞</span> Contato</a></li>
+    </ul>
+    <div class="drw-ft">
+      <button onclick="go('contato');toggleDrawer();" class="drw-btn">❤️ Quero Doar</button>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- ══ HOME ══ -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-ey"><span class="hero-dot"></span>Org. sem fins lucrativos</div>
+        <h2 class="hero-h">Cultura<br>que trans&shy;forma.</h2>
+        <p class="hero-p">Educação, esporte e arte para comunidades em vulnerabilidade em Afonso Cláudio, ES.</p>
+        <div class="hero-acts">
+          <button onclick="go('contato')" class="bh f">❤️ Apoiar</button>
+          <button onclick="go('sobre')" class="bh g">Conheça</button>
+        </div>
+      </div>
+      <div class="hero-sep"></div>
+      <div class="sec">
+        <div class="sec-row"><span class="sec-t">Projetos</span><button onclick="go('projetos')" class="sec-more">Ver todos ›</button></div>
+        <div class="pscroll">
+          <div class="pc" onclick="openDetail('proj-orquestra')"><div class="pc-ic">🎻</div><h4>Orquestra Jônice Tristão</h4><p>Cordas e sopros</p></div>
+          <div class="pc" onclick="openDetail('proj-corais')"><div class="pc-ic">🎤</div><h4>Corais das Montanhas</h4><p>Canto coral</p></div>
+          <div class="pc" onclick="openDetail('proj-ct')"><div class="pc-ic">🏐</div><h4>Centro de Treinamento</h4><p>Alto rendimento</p></div>
+          <div class="pc" onclick="openDetail('proj-musical')"><div class="pc-ic">🌱</div><h4>Musicalização Agrícola</h4><p>Arte no campo</p></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-row"><span class="sec-t">Eventos</span><button onclick="go('eventos')" class="sec-more">Ver todos ›</button></div>
+        <div class="evl">
+          <div class="evr" onclick="openDetail('ev-vijazz')"><div class="evb"><span class="ei">🎷</span><span class="el">Jazz</span></div><div class="evinfo"><h4>VIJAZZ</h4><p>Festival de Jazz nas Montanhas</p></div><span class="evarr">›</span></div>
+          <div class="evr" onclick="openDetail('ev-volei')"><div class="evb"><span class="ei">🏐</span><span class="el">Copa</span></div><div class="evinfo"><h4>Supercopa Voleibol</h4><p>Competição regional</p></div><span class="evarr">›</span></div>
+          <div class="evr" onclick="openDetail('ev-carna')"><div class="evb"><span class="ei">🎭</span><span class="el">Fest</span></div><div class="evinfo"><h4>CarnaRota do Empoçado</h4><p>Celebração cultural</p></div><span class="evarr">›</span></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><span class="stn">8+</span><span class="stl">Projetos</span></div>
+        <div class="st"><span class="stn">25+</span><span class="stl">Parceiros</span></div>
+        <div class="st"><span class="stn">∞</span><span class="stl">Impacto</span></div>
+      </div>
+    </section>
+
+    <!-- ══ PROJETOS ══ -->
+    <section id="page-projetos" class="page">
+      <div class="pgh"><p class="pg-ey">Iniciativas</p><h2 class="pg-t">Projetos</h2><p class="pg-d">Ações gratuitas que transformam vidas por meio da arte, esporte e cultura.</p></div>
+      <div class="ilist">
+        <div class="irow" onclick="openDetail('proj-orquestra')"><div class="iic">🎻</div><div class="ibody"><h4>Orquestra Jônice Tristão</h4><p>Formação de músicos com cordas e sopros</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-viola')"><div class="iic">🎼</div><div class="ibody"><h4>Orquestra de Viola</h4><p>Música tradicional capixaba com viola caipira</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-ct')"><div class="iic">🏐</div><div class="ibody"><h4>Centro de Treinamento das Montanhas</h4><p>Esporte de alto rendimento para jovens</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-musical')"><div class="iic">🌱</div><div class="ibody"><h4>Musicalização Agrícola</h4><p>Música para crianças e jovens do campo</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-corais')"><div class="iic">🎤</div><div class="ibody"><h4>Corais das Montanhas</h4><p>Canto coral para todas as idades</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-sons')"><div class="iic">✨</div><div class="ibody"><h4>Sons e Sonhos</h4><p>Arte para crianças em vulnerabilidade social</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-classica')"><div class="iic">🎹</div><div class="ibody"><h4>Música Clássica nas Montanhas</h4><p>Concertos e formação em música erudita</p></div><span class="iarr">›</span></div>
+        <div class="irow" onclick="openDetail('proj-scfv')"><div class="iic">🤝</div><div class="ibody"><h4>SCFV</h4><p>Serviço de Convivência e Fortalecimento de Vínculos</p></div><span class="iarr">›</span></div>
+      </div>
+    </section>
+
+    <!-- ══ EVENTOS ══ -->
+    <section id="page-eventos" class="page">
+      <div class="pgh"><p class="pg-ey">Agenda</p><h2 class="pg-t">Eventos</h2><p class="pg-d">Eventos culturais e esportivos abertos à comunidade.</p></div>
+      <div class="evcards">
+        <div class="evc dk" onclick="openDetail('ev-vijazz')"><div class="evc-tag">🎷 Festival</div><h3>VIJAZZ</h3><p>Festival de Jazz nas Montanhas — celebração da música regional e cultura viva.</p><span class="evc-cta">Ver detalhes →</span></div>
+        <div class="evc lt" onclick="openDetail('ev-volei')"><div class="evc-tag">🏐 Esporte</div><h3>Supercopa de Voleibol</h3><p>Competição regional com times de todo o Espírito Santo.</p><span class="evc-cta">Ver detalhes →</span></div>
+        <div class="evc dk" onclick="openDetail('ev-basquete')"><div class="evc-tag">🏀 Esporte</div><h3>Supercopa de Basquete</h3><p>Torneio de basquete entre equipes da região serrana.</p><span class="evc-cta">Ver detalhes →</span></div>
+        <div class="evc lt" onclick="openDetail('ev-carna')"><div class="evc-tag">🎭 Cultural</div><h3>CarnaRota do Empoçado</h3><p>Celebração cultural e festiva com toda a comunidade.</p><span class="evc-cta">Ver detalhes →</span></div>
+        <div class="evc dk" onclick="openDetail('ev-vn')"><div class="evc-tag">📝 Inscrições</div><h3>Inscrição Venda Nova</h3><p>Participe dos projetos em Venda Nova do Imigrante.</p><span class="evc-cta">Saiba mais →</span></div>
+      </div>
+    </section>
+
+    <!-- ══ NOTÍCIAS ══ -->
+    <section id="page-noticias" class="page">
+      <div class="pgh"><p class="pg-ey">Novidades</p><h2 class="pg-t">Notícias</h2><p class="pg-d">Acompanhe tudo que acontece no Instituto.</p></div>
+      <div class="nwrap">
+        <div class="news-card" onclick="openDetail('news-vijazz')">
+          <p class="news-tag">📰 Festival</p>
+          <h4>VIJAZZ reuniu centenas de pessoas em Afonso Cláudio</h4>
+          <p>O festival de jazz das montanhas encantou o público com apresentações de artistas locais e regionais, reforçando a identidade cultural do município.</p>
+          <span class="news-more">Ler mais →</span>
+        </div>
+        <div class="news-card" onclick="openDetail('news-orquestra')">
+          <p class="news-tag">🎻 Projeto</p>
+          <h4>Orquestra Jônice Tristão forma nova turma</h4>
+          <p>Novas inscrições abertas para crianças e jovens entre 7 e 18 anos. Aulas gratuitas de violino, viola e violoncelo no contra turno escolar.</p>
+          <span class="news-more">Ler mais →</span>
+        </div>
+        <div class="news-card" onclick="openDetail('news-ct')">
+          <p class="news-tag">🏐 Esporte</p>
+          <h4>Centro de Treinamento revela novos talentos</h4>
+          <p>Jovens atletas formados pelo Instituto são convocados para seleções regionais de voleibol e basquete, mostrando o impacto do projeto.</p>
+          <span class="news-more">Ler mais →</span>
+        </div>
+        <div class="news-card" onclick="openDetail('news-scfv')">
+          <p class="news-tag">🤝 Social</p>
+          <h4>SCFV atende mais de 200 crianças em 2024</h4>
+          <p>O Serviço de Convivência e Fortalecimento de Vínculos ampliou sua capacidade de atendimento, beneficiando famílias em situação de vulnerabilidade.</p>
+          <span class="news-more">Ler mais →</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SOBRE ══ -->
+    <section id="page-sobre" class="page">
+      <div class="pgh"><p class="pg-ey">Quem somos</p><h2 class="pg-t">Sobre</h2></div>
+      <div class="swrap">
+        <div class="sq">
+          <div class="sq-logo-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 108" width="120" height="130">
+              <polygon points="38,0 46,14 54,8 60,22 56,36 64,30 68,46 62,60 70,54 72,72 66,86 74,96 68,108 30,108" fill="#fff"/>
+              <polygon points="38,0 30,14 22,10 18,26 24,40 16,48 20,62 14,76 18,90 22,108 68,108" fill="#ddd"/>
+            </svg>
+          </div>
+          <div class="sq-mk">"</div>
+          <p class="sq-tx">Transformando a sociedade por meio da educação, esporte e cultura.</p>
+        </div>
+        <div class="infc"><p class="infl">Missão</p><p class="infv">Promover o acesso à educação, arte e esporte como instrumentos de transformação social e desenvolvimento humano integral.</p></div>
+        <div class="infc"><p class="infl">Visão</p><p class="infv">Ser referência regional no desenvolvimento humano por meio da cultura, reconhecida pelo impacto social e pela excelência de seus projetos.</p></div>
+        <div class="infc"><p class="infl">Valores</p><p class="infv">Inclusão · Excelência · Transparência · Comprometimento · Respeito à diversidade cultural</p></div>
+        <div class="infc"><p class="infl">Quem somos</p><p class="infv">Organização sem fins lucrativos fundada em Afonso Cláudio, ES. Apoiamos populações em situação de vulnerabilidade social com projetos de cultura, esporte, saúde e ações sociais, acreditando que arte e educação são caminhos de transformação.</p></div>
+        <div class="infc"><p class="infl">Endereço</p><p class="infv">Rua Alcino Martins de Souza, 110<br>Bairro João Valim · Afonso Cláudio / ES</p></div>
+        <div class="slinks">
+          <div class="slink" onclick="openDetail('sobre-atendidos')">Perfil dos Atendidos <span>›</span></div>
+          <div class="slink" onclick="openDetail('sobre-voluntario')">Seja Voluntário <span>›</span></div>
+          <div class="slink" onclick="openDetail('sobre-patrocinadores')">Patrocinadores <span>›</span></div>
+        </div>
+        <div class="cnpj-tag">CNPJ 51.892.817/0001-52</div>
+      </div>
+    </section>
+
+    <!-- ══ TRANSPARÊNCIA ══ -->
+    <section id="page-transparencia" class="page">
+      <div class="pgh"><p class="pg-ey">Gestão</p><h2 class="pg-t">Transparência</h2><p class="pg-d">Prestação de contas e documentos abertos.</p></div>
+      <div class="twrap">
+        <div class="tcard" onclick="openDetail('trans-relatorios')"><div class="tc-ic">📋</div><h4>Relatórios e Documentos</h4><p>Relatórios de gestão, demonstrativos financeiros e documentos institucionais do ICM.</p><span class="tcard-arr">Ver documentos →</span></div>
+        <div class="tcard" onclick="openDetail('trans-fornecedores')"><div class="tc-ic">🤝</div><h4>Cadastro de Fornecedores</h4><p>Empresas e profissionais que desejam fornecer serviços para o Instituto.</p><span class="tcard-arr">Saiba como →</span></div>
+        <div class="tcard" onclick="openDetail('trans-ouvidoria')"><div class="tc-ic">📣</div><h4>Ouvidoria</h4><p>Canal direto para sugestões, reclamações e denúncias relacionadas ao Instituto.</p><span class="tcard-arr">Enviar mensagem →</span></div>
+      </div>
+    </section>
+
+    <!-- ══ CONTATO ══ -->
+    <section id="page-contato" class="page">
+      <div class="pgh"><p class="pg-ey">Fale conosco</p><h2 class="pg-t">Contato</h2><p class="pg-d">Nos siga nas redes ou envie uma mensagem.</p></div>
+      <div class="ctwrap">
+        <div class="socgrid">
+          <a href="https://wa.me/27996996584" class="socc"><div class="socic" style="background:#25D366"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div><div class="socbody"><h4>WhatsApp</h4><p>(27) 99699-6584</p></div><span style="color:var(--c3)">›</span></a>
+          <a href="mailto:institutodasmontanhas@gmail.com" class="socc"><div class="socic" style="background:#EA4335"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="socbody"><h4>E-mail</h4><p>institutodasmontanhas@gmail.com</p></div><span style="color:var(--c3)">›</span></a>
+          <a href="https://www.instagram.com/institutodasmontanhas" class="socc"><div class="socic" style="background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div><div class="socbody"><h4>Instagram</h4><p>@institutodasmontanhas</p></div><span style="color:var(--c3)">›</span></a>
+          <a href="https://www.facebook.com/profile.php?id=61587673710640" class="socc"><div class="socic" style="background:#1877F2"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div><div class="socbody"><h4>Facebook</h4><p>Instituto Cultural das Montanhas</p></div><span style="color:var(--c3)">›</span></a>
+          <a href="https://www.linkedin.com/company/instituto-cultural-das-montanhas" class="socc"><div class="socic" style="background:#0077B5"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div><div class="socbody"><h4>LinkedIn</h4><p>Instituto Cultural das Montanhas</p></div><span style="color:var(--c3)">›</span></a>
+        </div>
+        <div class="donatecta">
+          <p>Apoie nossa missão e ajude a transformar mais vidas em Afonso Cláudio.</p>
+          <a href="https://wa.me/27996996584" class="btn-donate">❤️ Fazer uma Doação</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnv">
+    <button class="bn on" onclick="go('home')" id="bn-home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</button>
+    <button class="bn" onclick="go('projetos')" id="bn-projetos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19V6l12-3v13M9 19c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm12-3c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"/></svg>Projetos</button>
+    <button class="bn" onclick="go('eventos')" id="bn-eventos"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Eventos</button>
+    <button class="bn" onclick="go('contato')" id="bn-contato"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Contato</button>
+  </nav>
+
+  <!-- ══════════════════════════════════
+       DETAIL VIEWS — sub-páginas internas
+  ══════════════════════════════════ -->
+
+  <!-- PROJETOS -->
+  <div id="proj-orquestra" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-orquestra')">‹</button><span class="detail-hdr-title">Orquestra Jônice Tristão</span></div><div class="detail-hero"><div class="di">🎻</div><h2>Orquestra Jônice Tristão</h2><p>Formação musical gratuita para crianças e jovens com instrumentos de cordas e sopros.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>A Orquestra Jônice Tristão oferece educação musical de excelência para crianças e jovens em situação de vulnerabilidade social. As aulas são totalmente gratuitas e acontecem no contra turno escolar, garantindo que a música não concorra com a educação formal.</p></div><div class="detail-section"><h3>O que oferecemos</h3><ul><li>Aulas de violino, viola e violoncelo</li><li>Teoria musical e leitura de partitura</li><li>Ensaios coletivos semanais</li><li>Apresentações públicas e concertos</li><li>Instrumento fornecido pelo Instituto</li></ul></div><div class="detail-section"><h3>Quem pode participar</h3><p>Crianças e jovens entre 7 e 18 anos, residentes em Afonso Cláudio e região. Não é necessário ter experiência prévia em música.</p></div><div class="detail-section"><h3>Inscrições</h3><p>Entre em contato pelo WhatsApp (27) 99699-6584 ou pelo e-mail institutodasmontanhas@gmail.com para saber sobre vagas disponíveis.</p></div><div class="tag-row"><span class="tag">Gratuito</span><span class="tag">7 a 18 anos</span><span class="tag">Instrumentos fornecidos</span><span class="tag dark">Vagas limitadas</span></div></div></div>
+
+  <div id="proj-viola" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-viola')">‹</button><span class="detail-hdr-title">Orquestra de Viola</span></div><div class="detail-hero"><div class="di">🎼</div><h2>Orquestra de Viola</h2><p>Resgate e valorização da música tradicional capixaba através da viola caipira.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>A Orquestra de Viola é um projeto de resgate cultural que valoriza a música tradicional do interior do Espírito Santo. Por meio da viola caipira, o Instituto preserva a identidade cultural da região e conecta as novas gerações às raízes musicais capixabas.</p></div><div class="detail-section"><h3>O que oferecemos</h3><ul><li>Aulas de viola caipira</li><li>Pesquisa e resgate de músicas tradicionais</li><li>Apresentações em festas e eventos culturais</li><li>Formação de professores locais</li></ul></div><div class="detail-section"><h3>Impacto cultural</h3><p>O projeto já resgatou mais de 50 composições tradicionais da região serrana do Espírito Santo, contribuindo para a preservação do patrimônio imaterial capixaba.</p></div><div class="tag-row"><span class="tag">Cultura regional</span><span class="tag">Patrimônio imaterial</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <div id="proj-ct" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-ct')">‹</button><span class="detail-hdr-title">Centro de Treinamento</span></div><div class="detail-hero"><div class="di">🏐</div><h2>Centro de Treinamento das Montanhas</h2><p>Esporte de alto rendimento para jovens talentos da região serrana.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>O Centro de Treinamento das Montanhas é um programa de esporte de alto rendimento que identifica e desenvolve talentos esportivos em Afonso Cláudio e região. O projeto oferece treinamento profissional em voleibol e basquete para jovens atletas.</p></div><div class="detail-section"><h3>Modalidades</h3><ul><li>Voleibol masculino e feminino</li><li>Basquete masculino e feminino</li><li>Preparação física e condicionamento</li><li>Psicologia esportiva</li></ul></div><div class="detail-section"><h3>Conquistas</h3><p>Atletas formados pelo Centro já foram convocados para seleções regionais e conquistaram títulos na Supercopa de Voleibol e Supercopa de Basquete das Montanhas.</p></div><div class="tag-row"><span class="tag">Alto rendimento</span><span class="tag">Voleibol</span><span class="tag">Basquete</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <div id="proj-musical" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-musical')">‹</button><span class="detail-hdr-title">Musicalização Agrícola</span></div><div class="detail-hero"><div class="di">🌱</div><h2>Musicalização Agrícola</h2><p>Levando a música até crianças e jovens do campo.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>A Musicalização Agrícola leva educação musical até comunidades rurais de Afonso Cláudio e região. O projeto reconhece que crianças do campo muitas vezes não têm acesso à cultura e à arte, e busca diminuir essa desigualdade levando as aulas até elas.</p></div><div class="detail-section"><h3>Como funciona</h3><ul><li>Aulas nas próprias comunidades rurais</li><li>Professores que se deslocam até os alunos</li><li>Instrumentos de percussão e flauta</li><li>Apresentações nas festas rurais</li><li>Integração entre música e identidade do campo</li></ul></div><div class="detail-section"><h3>Abrangência</h3><p>O projeto atende comunidades rurais nos municípios de Afonso Cláudio, Venda Nova do Imigrante e municípios vizinhos da região serrana.</p></div><div class="tag-row"><span class="tag">Zona rural</span><span class="tag">Inclusão</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <div id="proj-corais" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-corais')">‹</button><span class="detail-hdr-title">Corais das Montanhas</span></div><div class="detail-hero"><div class="di">🎤</div><h2>Corais das Montanhas</h2><p>Canto coral para todas as idades e vozes.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>Os Corais das Montanhas reúnem pessoas de todas as idades em torno do canto coral, uma das formas mais acessíveis de fazer música em grupo. O projeto conta com grupos infantil, juvenil e adulto, cada um com seu próprio repertório e identidade.</p></div><div class="detail-section"><h3>Grupos</h3><ul><li>Coral Infantil (6 a 12 anos)</li><li>Coral Juvenil (13 a 18 anos)</li><li>Coral Adulto (18 anos em diante)</li></ul></div><div class="detail-section"><h3>Repertório</h3><p>Os corais trabalham com música sacra, popular brasileira, músicas regionais capixabas e repertório internacional, participando de festivais e concursos estaduais.</p></div><div class="tag-row"><span class="tag">Todas as idades</span><span class="tag">Sem experiência necessária</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <div id="proj-sons" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-sons')">‹</button><span class="detail-hdr-title">Sons e Sonhos</span></div><div class="detail-hero"><div class="di">✨</div><h2>Sons e Sonhos</h2><p>Arte e esperança para crianças em situação de vulnerabilidade.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>O Sons e Sonhos é um projeto de arteterapia e iniciação musical voltado especificamente para crianças em situação de vulnerabilidade social. Por meio da arte, trabalhamos autoestima, vínculos afetivos e desenvolvimento emocional.</p></div><div class="detail-section"><h3>Atividades</h3><ul><li>Iniciação musical lúdica</li><li>Artes visuais e pintura</li><li>Teatro e expressão corporal</li><li>Contação de histórias</li><li>Oficinas de artesanato</li></ul></div><div class="detail-section"><h3>Público</h3><p>Crianças de 4 a 12 anos encaminhadas pelo CRAS, escolas municipais e programas de assistência social do município de Afonso Cláudio.</p></div><div class="tag-row"><span class="tag">4 a 12 anos</span><span class="tag">Arteterapia</span><span class="tag">Vulnerabilidade social</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <div id="proj-classica" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-classica')">‹</button><span class="detail-hdr-title">Música Clássica nas Montanhas</span></div><div class="detail-hero"><div class="di">🎹</div><h2>Música Clássica nas Montanhas</h2><p>Concertos e formação em música erudita para toda a comunidade.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>O Música Clássica nas Montanhas democratiza o acesso à música erudita, levando concertos e apresentações de alta qualidade para a comunidade de Afonso Cláudio. O projeto também forma intérpretes e apreciadores de música clássica.</p></div><div class="detail-section"><h3>Programação</h3><ul><li>Concertos mensais abertos ao público</li><li>Aulas de piano, violino e flauta</li><li>Palestras sobre história da música</li><li>Apresentações em escolas públicas</li></ul></div><div class="detail-section"><h3>Acesso livre</h3><p>Todos os concertos são gratuitos e abertos ao público. As aulas têm vagas limitadas e são direcionadas a crianças e jovens em situação de vulnerabilidade.</p></div><div class="tag-row"><span class="tag">Concertos gratuitos</span><span class="tag">Piano</span><span class="tag">Violino</span><span class="tag dark">Acesso livre</span></div></div></div>
+
+  <div id="proj-scfv" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('proj-scfv')">‹</button><span class="detail-hdr-title">SCFV</span></div><div class="detail-hero"><div class="di">🤝</div><h2>SCFV</h2><p>Serviço de Convivência e Fortalecimento de Vínculos.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o projeto</h3><p>O SCFV — Serviço de Convivência e Fortalecimento de Vínculos é um programa do governo federal executado pelo Instituto Cultural das Montanhas em parceria com a Prefeitura de Afonso Cláudio. Atende crianças, adolescentes e idosos em situação de vulnerabilidade social.</p></div><div class="detail-section"><h3>Público atendido</h3><ul><li>Crianças de 6 a 15 anos</li><li>Adolescentes de 15 a 17 anos</li><li>Idosos a partir de 60 anos</li></ul></div><div class="detail-section"><h3>Atividades</h3><p>Oficinas culturais, atividades físicas, convivência intergeracional, orientação sociofamiliar, atividades de lazer e integração comunitária. Em 2024, o projeto atendeu mais de 200 famílias.</p></div><div class="tag-row"><span class="tag">Programa federal</span><span class="tag">Assistência social</span><span class="tag dark">200+ famílias</span></div></div></div>
+
+  <!-- EVENTOS -->
+  <div id="ev-vijazz" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('ev-vijazz')">‹</button><span class="detail-hdr-title">VIJAZZ</span></div><div class="detail-hero"><div class="di">🎷</div><h2>VIJAZZ</h2><p>Festival de Jazz nas Montanhas de Afonso Cláudio.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o festival</h3><p>O VIJAZZ é o Festival de Jazz das Montanhas, um dos maiores eventos culturais da região serrana do Espírito Santo. O festival reúne artistas locais, regionais e nacionais em apresentações ao ar livre e em espaços culturais de Afonso Cláudio.</p></div><div class="detail-section"><h3>Programação</h3><ul><li>Shows de jazz, blues e música instrumental</li><li>Apresentações da Orquestra Jônice Tristão</li><li>Oficinas e masterclasses com músicos convidados</li><li>Praça de alimentação com produtos regionais</li><li>Exposições de arte e artesanato local</li></ul></div><div class="detail-section"><h3>Entrada</h3><p>A maioria das apresentações é gratuita e aberta ao público. Algumas atrações especiais podem ter ingressos solidários com arrecadação para os projetos do Instituto.</p></div><div class="tag-row"><span class="tag">Entrada gratuita</span><span class="tag">Ao ar livre</span><span class="tag">Anual</span><span class="tag dark">Afonso Cláudio</span></div></div></div>
+
+  <div id="ev-volei" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('ev-volei')">‹</button><span class="detail-hdr-title">Supercopa de Voleibol</span></div><div class="detail-hero"><div class="di">🏐</div><h2>Supercopa de Voleibol das Montanhas</h2><p>Competição regional de voleibol no coração do ES.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o evento</h3><p>A Supercopa de Voleibol das Montanhas é uma competição regional que reúne times de todo o Espírito Santo em Afonso Cláudio. O torneio tem categorias masculina e feminina e movimenta centenas de atletas e torcedores na cidade.</p></div><div class="detail-section"><h3>Categorias</h3><ul><li>Sub-14 masculino e feminino</li><li>Sub-17 masculino e feminino</li><li>Adulto masculino e feminino</li></ul></div><div class="detail-section"><h3>Inscrições</h3><p>Equipes interessadas devem entrar em contato pelo WhatsApp (27) 99699-6584. As inscrições abrem 60 dias antes do evento.</p></div><div class="tag-row"><span class="tag">Competição regional</span><span class="tag">Masculino e Feminino</span><span class="tag dark">Afonso Cláudio</span></div></div></div>
+
+  <div id="ev-basquete" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('ev-basquete')">‹</button><span class="detail-hdr-title">Supercopa de Basquete</span></div><div class="detail-hero"><div class="di">🏀</div><h2>Supercopa de Basquete das Montanhas</h2><p>Torneio de basquete da região serrana capixaba.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o evento</h3><p>A Supercopa de Basquete das Montanhas reúne equipes da região serrana do Espírito Santo para dois dias de basquete de alto nível. O evento é uma vitrine para jovens talentos do Centro de Treinamento das Montanhas e de outros clubes da região.</p></div><div class="detail-section"><h3>Formato</h3><ul><li>Fase de grupos + eliminatórias</li><li>Categorias sub-15, sub-17 e adulto</li><li>Arbitragem profissional</li><li>Troféus e premiações</li></ul></div><div class="detail-section"><h3>Contato</h3><p>Informações sobre inscrições e datas pelo WhatsApp (27) 99699-6584.</p></div><div class="tag-row"><span class="tag">Basquete</span><span class="tag">Região serrana</span><span class="tag dark">Anual</span></div></div></div>
+
+  <div id="ev-carna" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('ev-carna')">‹</button><span class="detail-hdr-title">CarnaRota do Empoçado</span></div><div class="detail-hero"><div class="di">🎭</div><h2>CarnaRota do Empoçado</h2><p>Celebração cultural e festiva da comunidade.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre o evento</h3><p>A CarnaRota do Empoçado é uma celebração que une o carnaval à identidade cultural de Afonso Cláudio. O evento percorre pontos turísticos e culturais da cidade, com blocos, shows musicais e apresentações artísticas que celebram a tradição local.</p></div><div class="detail-section"><h3>Programação</h3><ul><li>Blocos carnavalescos temáticos</li><li>Shows de música ao vivo</li><li>Apresentações dos projetos do Instituto</li><li>Exposição de artesanato local</li><li>Gastronomia regional</li></ul></div><div class="detail-section"><h3>Participação</h3><p>O evento é aberto à toda a comunidade e tem entrada gratuita. Grupos e artistas interessados em participar podem entrar em contato pelo WhatsApp (27) 99699-6584.</p></div><div class="tag-row"><span class="tag">Gratuito</span><span class="tag">Família</span><span class="tag">Cultura local</span><span class="tag dark">Carnaval</span></div></div></div>
+
+  <div id="ev-vn" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('ev-vn')">‹</button><span class="detail-hdr-title">Inscrição Venda Nova</span></div><div class="detail-hero"><div class="di">📝</div><h2>Inscrição Venda Nova do Imigrante</h2><p>Participe dos projetos do ICM em Venda Nova do Imigrante.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Sobre</h3><p>O Instituto Cultural das Montanhas está expandindo seus projetos para Venda Nova do Imigrante. Crianças, jovens e famílias do município já podem se inscrever para participar das atividades do Instituto na região.</p></div><div class="detail-section"><h3>Projetos disponíveis</h3><ul><li>Musicalização Agrícola</li><li>Corais das Montanhas</li><li>Sons e Sonhos</li><li>SCFV (sujeito a convênio municipal)</li></ul></div><div class="detail-section"><h3>Como se inscrever</h3><p>Entre em contato pelo WhatsApp (27) 99699-6584 ou pelo e-mail institutodasmontanhas@gmail.com informando nome, idade e projeto de interesse.</p></div><div class="tag-row"><span class="tag">Venda Nova do Imigrante</span><span class="tag">Expansão</span><span class="tag dark">Gratuito</span></div></div></div>
+
+  <!-- NOTÍCIAS -->
+  <div id="news-vijazz" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('news-vijazz')">‹</button><span class="detail-hdr-title">Notícia</span></div><div class="detail-hero"><div class="di">🎷</div><h2>VIJAZZ reuniu centenas em Afonso Cláudio</h2><p>Festival de Jazz das Montanhas bate recorde de público.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Cobertura do evento</h3><p>A mais recente edição do VIJAZZ superou todas as expectativas, reunindo centenas de pessoas nos três dias de festival. Artistas de todo o Espírito Santo se apresentaram nos palcos montados no centro de Afonso Cláudio, celebrando o jazz e a cultura regional.</p></div><div class="detail-section"><h3>Destaques</h3><p>A Orquestra Jônice Tristão abriu o festival com uma apresentação emocionante que arrancou aplausos do público. O encerramento contou com um show especial com músicos convidados de Vitória e do Rio de Janeiro.</p></div><div class="detail-section"><h3>Próxima edição</h3><p>A organização já está planejando a próxima edição do VIJAZZ. Artistas e patrocinadores interessados podem entrar em contato pelo WhatsApp (27) 99699-6584.</p></div></div></div>
+
+  <div id="news-orquestra" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('news-orquestra')">‹</button><span class="detail-hdr-title">Notícia</span></div><div class="detail-hero"><div class="di">🎻</div><h2>Orquestra Jônice Tristão abre nova turma</h2><p>Inscrições gratuitas para crianças e jovens de 7 a 18 anos.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Novas vagas abertas</h3><p>A Orquestra Jônice Tristão está com inscrições abertas para a nova turma. São oferecidas vagas para os instrumentos de violino, viola e violoncelo, com aulas totalmente gratuitas para crianças e jovens entre 7 e 18 anos.</p></div><div class="detail-section"><h3>Como se inscrever</h3><p>As inscrições podem ser feitas pelo WhatsApp (27) 99699-6584 ou pessoalmente na sede do Instituto, na Rua Alcino Martins de Souza, 110, Bairro João Valim, Afonso Cláudio.</p></div><div class="detail-section"><h3>Requisitos</h3><p>Não é necessário ter experiência musical prévia. O instrumento é fornecido pelo Instituto durante as aulas. As vagas são limitadas e preenchidas por ordem de inscrição, com prioridade para crianças em situação de vulnerabilidade social.</p></div></div></div>
+
+  <div id="news-ct" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('news-ct')">‹</button><span class="detail-hdr-title">Notícia</span></div><div class="detail-hero"><div class="di">🏐</div><h2>Centro de Treinamento revela novos talentos</h2><p>Jovens atletas do ICM são convocados para seleções regionais.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Atletas em destaque</h3><p>Jovens formados pelo Centro de Treinamento das Montanhas foram convocados para representar a região serrana nas seleções estaduais de voleibol e basquete. O resultado confirma a qualidade do trabalho desenvolvido pelo Instituto.</p></div><div class="detail-section"><h3>Resultados recentes</h3><ul><li>3 atletas convocados para a seleção estadual sub-17 de voleibol</li><li>2 atletas selecionados para o estadual de basquete sub-15</li><li>Equipe feminina vice-campeã da Supercopa Regional</li></ul></div><div class="detail-section"><h3>Próximos passos</h3><p>O Centro está ampliando sua estrutura para atender mais jovens atletas. Informações sobre inscrições pelo WhatsApp (27) 99699-6584.</p></div></div></div>
+
+  <div id="news-scfv" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('news-scfv')">‹</button><span class="detail-hdr-title">Notícia</span></div><div class="detail-hero"><div class="di">🤝</div><h2>SCFV atende mais de 200 crianças em 2024</h2><p>Serviço amplia capacidade e transforma famílias em Afonso Cláudio.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Crescimento do programa</h3><p>O SCFV — Serviço de Convivência e Fortalecimento de Vínculos do Instituto Cultural das Montanhas encerrou 2024 com um marco histórico: mais de 200 crianças e adolescentes atendidos ao longo do ano, além de dezenas de idosos participantes das atividades intergeracionais.</p></div><div class="detail-section"><h3>Impacto nas famílias</h3><p>O programa trabalha não apenas com as crianças, mas com toda a família. Oficinas de orientação familiar, acesso a direitos e fortalecimento de vínculos afetivos foram os pilares do trabalho em 2024.</p></div><div class="detail-section"><h3>2025</h3><p>Para 2025, o programa prevê a expansão do atendimento para novos bairros de Afonso Cláudio e a criação de um grupo específico para adolescentes em cumprimento de medidas socioeducativas.</p></div></div></div>
+
+  <!-- SOBRE SUB-PÁGINAS -->
+  <div id="sobre-atendidos" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('sobre-atendidos')">‹</button><span class="detail-hdr-title">Perfil dos Atendidos</span></div><div class="detail-hero"><div class="di">👥</div><h2>Perfil dos Atendidos</h2><p>Conheça quem transforma com o Instituto.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Quem atendemos</h3><p>O Instituto Cultural das Montanhas atende prioritariamente crianças, adolescentes e jovens em situação de vulnerabilidade social, residentes em Afonso Cláudio e municípios vizinhos da região serrana do Espírito Santo.</p></div><div class="detail-section"><h3>Perfil socioeconômico</h3><ul><li>Famílias inscritas no CadÚnico</li><li>Crianças encaminhadas pelo CRAS e CREAS</li><li>Jovens em zona rural com pouco acesso à cultura</li><li>Adolescentes em situação de risco social</li><li>Idosos em situação de isolamento social</li></ul></div><div class="detail-section"><h3>Números</h3><p>Em 2024, o Instituto impactou diretamente mais de 500 pessoas entre participantes de projetos, familiares e comunidade, através de seus 8 projetos ativos.</p></div><div class="tag-row"><span class="tag">500+ impactados</span><span class="tag">8 projetos</span><span class="tag dark">Afonso Cláudio e região</span></div></div></div>
+
+  <div id="sobre-voluntario" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('sobre-voluntario')">‹</button><span class="detail-hdr-title">Seja Voluntário</span></div><div class="detail-hero"><div class="di">🙋</div><h2>Seja Voluntário</h2><p>Junte-se a nós e transforme vidas através da cultura.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Por que ser voluntário?</h3><p>O voluntariado no Instituto Cultural das Montanhas é uma oportunidade de contribuir diretamente para a transformação social de Afonso Cláudio. Cada hora dedicada ajuda a manter projetos que mudam a vida de crianças e jovens.</p></div><div class="detail-section"><h3>Áreas de atuação</h3><ul><li>Ensino musical (instrumentos, teoria, canto)</li><li>Esporte e educação física</li><li>Artes visuais e artesanato</li><li>Comunicação e redes sociais</li><li>Captação de recursos e projetos</li><li>Apoio administrativo</li><li>Transporte e logística de eventos</li></ul></div><div class="detail-section"><h3>Como se candidatar</h3><p>Envie uma mensagem pelo WhatsApp (27) 99699-6584 ou pelo e-mail institutodasmontanhas@gmail.com com seu nome, área de interesse e disponibilidade de horário.</p></div><div class="tag-row"><span class="tag">Todas as áreas</span><span class="tag">Flexível</span><span class="tag dark">Candidate-se já</span></div></div></div>
+
+  <div id="sobre-patrocinadores" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('sobre-patrocinadores')">‹</button><span class="detail-hdr-title">Patrocinadores</span></div><div class="detail-hero"><div class="di">🌟</div><h2>Patrocinadores e Parceiros</h2><p>Empresas e instituições que acreditam na transformação pela cultura.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Nossos parceiros</h3><p>O Instituto Cultural das Montanhas conta com o apoio de empresas, prefeituras, governo estadual e federal, além de pessoas físicas que acreditam no poder transformador da cultura e do esporte.</p></div><div class="detail-section"><h3>Como apoiar</h3><ul><li>Patrocínio de projetos ou eventos</li><li>Doação de instrumentos musicais e equipamentos</li><li>Lei de Incentivo à Cultura (dedução fiscal)</li><li>Doação de produtos e serviços</li><li>Parcerias institucionais</li></ul></div><div class="detail-section"><h3>Seja um patrocinador</h3><p>Entre em contato pelo WhatsApp (27) 99699-6584 ou pelo e-mail institutodasmontanhas@gmail.com. Enviamos uma proposta de parceria personalizada para sua empresa.</p></div><div class="tag-row"><span class="tag">Lei de Incentivo</span><span class="tag">Dedução fiscal</span><span class="tag dark">Fale conosco</span></div></div></div>
+
+  <!-- TRANSPARÊNCIA SUB-PÁGINAS -->
+  <div id="trans-relatorios" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('trans-relatorios')">‹</button><span class="detail-hdr-title">Relatórios</span></div><div class="detail-hero"><div class="di">📋</div><h2>Relatórios e Documentos</h2><p>Gestão transparente e prestação de contas ao público.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Nosso compromisso</h3><p>O Instituto Cultural das Montanhas acredita que a transparência é fundamental para uma organização da sociedade civil. Todos os nossos documentos institucionais e relatórios de gestão estão disponíveis para consulta.</p></div><div class="detail-section"><h3>Documentos disponíveis</h3><ul><li>Estatuto Social do Instituto</li><li>Atas de reuniões da Diretoria</li><li>Relatórios anuais de atividades</li><li>Demonstrativos financeiros</li><li>Certidões negativas (CNPJ, INSS, FGTS)</li><li>Contratos e convênios com o poder público</li></ul></div><div class="detail-section"><h3>Solicitar documentos</h3><p>Para solicitar qualquer documento institucional, entre em contato pelo e-mail institutodasmontanhas@gmail.com ou pelo WhatsApp (27) 99699-6584. O prazo de resposta é de até 5 dias úteis.</p></div><div class="tag-row"><span class="tag">CNPJ 51.892.817/0001-52</span><span class="tag dark">Transparência total</span></div></div></div>
+
+  <div id="trans-fornecedores" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('trans-fornecedores')">‹</button><span class="detail-hdr-title">Fornecedores</span></div><div class="detail-hero"><div class="di">🤝</div><h2>Cadastro de Fornecedores</h2><p>Trabalhe conosco e contribua com nossa missão.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Seja nosso fornecedor</h3><p>O Instituto Cultural das Montanhas busca fornecedores comprometidos com a missão social da organização. Priorizamos empresas locais e regionais, especialmente aquelas com práticas de responsabilidade social.</p></div><div class="detail-section"><h3>Categorias de fornecimento</h3><ul><li>Instrumentos musicais e equipamentos de som</li><li>Material esportivo</li><li>Materiais de escritório e papelaria</li><li>Serviços gráficos e comunicação</li><li>Alimentação para eventos</li><li>Transporte e logística</li><li>Serviços de TI e tecnologia</li></ul></div><div class="detail-section"><h3>Como se cadastrar</h3><p>Envie seus dados (razão social, CNPJ, área de atuação e contato) pelo e-mail institutodasmontanhas@gmail.com com o assunto "Cadastro de Fornecedor".</p></div></div></div>
+
+  <div id="trans-ouvidoria" class="detail"><div class="detail-hdr"><button class="back-btn" onclick="closeDetail('trans-ouvidoria')">‹</button><span class="detail-hdr-title">Ouvidoria</span></div><div class="detail-hero"><div class="di">📣</div><h2>Ouvidoria</h2><p>Canal direto para sua voz chegar ao Instituto.</p></div><div class="detail-sep"></div><div class="detail-body"><div class="detail-section"><h3>Nossa ouvidoria</h3><p>A ouvidoria do Instituto Cultural das Montanhas é um canal independente para receber sugestões, reclamações, denúncias e elogios relacionados às atividades do Instituto. Todas as mensagens são tratadas com sigilo e respondidas.</p></div><div class="detail-section"><h3>Como entrar em contato</h3><ul><li>📧 E-mail: institutodasmontanhas@gmail.com</li><li>📱 WhatsApp: (27) 99699-6584</li><li>📍 Presencialmente: Rua Alcino Martins de Souza, 110 — Afonso Cláudio/ES</li></ul></div><div class="detail-section"><h3>Prazo de resposta</h3><p>Todas as mensagens recebidas são respondidas em até 10 dias úteis. Casos urgentes são tratados em até 48 horas. Garantimos o sigilo de todas as informações recebidas.</p></div><div class="tag-row"><span class="tag">Sigiloso</span><span class="tag">Até 10 dias úteis</span><span class="tag dark">Anônimo se preferir</span></div></div></div>
+
+</div><!-- fim #app -->
+
+<script>
+const cfg={
+  home:          {title:'Início',        bn:'bn-home',    dl:'dl-home'},
+  projetos:      {title:'Projetos',      bn:'bn-projetos',dl:'dl-projetos'},
+  eventos:       {title:'Eventos',       bn:'bn-eventos', dl:'dl-eventos'},
+  noticias:      {title:'Notícias',      bn:null,         dl:'dl-noticias'},
+  sobre:         {title:'Sobre',         bn:null,         dl:'dl-sobre'},
+  transparencia: {title:'Transparência', bn:null,         dl:'dl-transparencia'},
+  contato:       {title:'Contato',       bn:'bn-contato', dl:'dl-contato'},
+};
+let cur='home', drw=false;
+
+function go(k){
+  if(!cfg[k])return;
+  document.getElementById('page-'+cur)?.classList.remove('active');
+  document.getElementById('page-'+k)?.classList.add('active');
+  document.querySelectorAll('.bn').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.drw-nav a').forEach(e=>e.classList.remove('on'));
+  if(cfg[k].bn)document.getElementById(cfg[k].bn)?.classList.add('on');
+  if(cfg[k].dl)document.getElementById(cfg[k].dl)?.classList.add('on');
+  document.getElementById('main').scrollTo({top:0,behavior:'smooth'});
+  cur=k;
+}
+
+function openDetail(id){
+  const el=document.getElementById(id);
+  if(el){el.classList.add('open');el.scrollTo({top:0});}
+}
+function closeDetail(id){
+  document.getElementById(id)?.classList.remove('open');
+}
+
+function toggleDrawer(){
+  drw=!drw;
+  document.getElementById('drw').classList.toggle('open',drw);
+  document.getElementById('ovl').classList.toggle('open',drw);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(drw)toggleDrawer();}});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('out');
+    document.getElementById('app').classList.add('ready');
+  },2000);
+});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
