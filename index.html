@@ -37,10 +37,10 @@ html,body{height:100%;width:100%;font-family:var(--font);background:#111111;over
 .safe-t{height:env(safe-area-inset-top,0px);background:var(--bg);flex-shrink:0;}
 
 /* HEADER */
-.hdr{display:flex;align-items:center;justify-content:center;padding:8px 18px;background:var(--bg);flex-shrink:0;min-height:60px;border-bottom:1.5px solid var(--c4);position:relative;}
-.hdr-l{display:flex;align-items:center;justify-content:center;}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;background:var(--bg);flex-shrink:0;min-height:70px;border-bottom:1.5px solid var(--c4);position:relative;}
+.hdr-l{display:flex;align-items:center;justify-content:flex-start;}
 .burger{display:none;}
-.avt{width:34px;height:34px;border-radius:50%;background:var(--c4);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--c1);position:absolute;right:18px;}
+.avt{width:34px;height:34px;border-radius:50%;background:var(--c4);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--c1);}
 
 /* DRAWER */
 .ovl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:49;opacity:0;pointer-events:none;transition:opacity .3s;}
@@ -233,7 +233,7 @@ html,body{height:100%;width:100%;font-family:var(--font);background:#111111;over
   <header class="hdr">
     <div class="hdr-l">
       <button class="burger" onclick="toggleDrawer()" aria-label="Menu"><span></span><span></span><span></span></button>
-      <img src="logo.png" alt="Instituto Cultural das Montanhas" width="150" height="52" style="object-fit: contain; filter: brightness(0);">
+      <img src="logo.png" alt="Instituto Cultural das Montanhas" width="300" height="104" style="object-fit: contain; filter: brightness(0);">
     </div>
     <button class="avt" onclick="go('contato')" aria-label="Contato">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
